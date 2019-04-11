@@ -208,10 +208,21 @@ static CFIndex WriteDataToStream(NSData* data, CFWriteStreamRef stream)
             continue;
         }
 
-        [postBodyBeforeFile appendData:formBoundaryData];
-        [postBodyBeforeFile appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n", key] dataUsingEncoding:NSUTF8StringEncoding]];
-        [postBodyBeforeFile appendData:[val dataUsingEncoding:NSUTF8StringEncoding]];
-        [postBodyBeforeFile appendData:[@"\r\n" dataUsingEncoding : NSUTF8StringEncoding]];
+        if ([key isEqualToString:@"info"]) {
+          [postBodyBeforeFile appendData:formBoundaryData];
+          [postBodyBeforeFile appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"; filename=\"%@\"\r\n", @"info", @"blob"] dataUsingEncoding:NSUTF8StringEncoding]];
+          [postBodyBeforeFile appendData:[[NSString stringWithFormat:@"Content-Type: %@\r\n\r\n", @"application/json"] dataUsingEncoding:NSUTF8StringEncoding]];
+
+          NSData *jsonData = [val dataUsingEncoding:NSUTF8StringEncoding];
+
+          [postBodyBeforeFile appendData:jsonData];
+          [postBodyBeforeFile appendData:[@"\r\n" dataUsingEncoding : NSUTF8StringEncoding]];
+      } else {
+          [postBodyBeforeFile appendData:formBoundaryData];
+          [postBodyBeforeFile appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n", key] dataUsingEncoding:NSUTF8StringEncoding]];
+          [postBodyBeforeFile appendData:[val dataUsingEncoding:NSUTF8StringEncoding]];
+          [postBodyBeforeFile appendData:[@"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+      }
     }
 
     [postBodyBeforeFile appendData:formBoundaryData];
